@@ -1,8 +1,66 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link,Redirect } from 'react-router-dom'
+import {connect} from 'react-redux'
+import {userRegister,loginWithGoogle} from './../1.actions'
+import Loader from 'react-loader-spinner'
+import firebase, { auth } from 'firebase'
+import {provider} from './../support/google'
+
 
 class Register extends React.Component{
+    state = {error : ""}
+    componentWillReceiveProps(newProps){
+        if(newProps.error !== ""){
+            this.setState({error : newProps.error})
+        }
+    }
+    renderLoadingOrBtn = () => {
+        if(this.props.loading ===true) {
+            return <Loader
+                        type = "Puff"
+                        color = "#00BFFF"
+                        height = "50"
+                        widht = "50"
+                        />
+        }else {
+            return  <button type="button"  onClick={this.onBtnRegisterClick}   className="btn btn-primary" style={{width:"300px"}}  ><i className="fas fa-sign-in-alt" /> Sign Up!</button>
+        }
+    }
+
+    renderErrorMassege = () => {
+        
+        if(this.state.error !==""){
+            return  <div class="alert alert-danger mt-5" role="alert">
+                        {this.state.error}
+                    </div>
+        }
+    }
+    onBtnRegisterClick = () => {
+        var username = this.refs.username.value
+        var password = this.refs.password.value
+        var email = this.refs.email.value
+        var phone = this.refs.phone.value
+        if(username === "" ||password === "" ||email === "" ||phone === "" ){
+            this.setState({error : "Harus diisi Semua"})
+        }else {
+            this.props.userRegister(username,password,email,phone)
+        }
+
+
+
+    }
+    loginWithGoogle = () => {
+        auth(). signInWithPopup (provider)
+        .then((res) => {
+            this.props.loginWithGoogle(res.user.email)
+        })
+        .then((err) => console.log(err))
+    }
+
     render(){
+        if(this.props.user !== ""){
+            return<Redirect to='/' />
+        }
         return(
             <div className="container myBody " style={{minHeight:"600px"}}>
                     <div className="row justify-content-sm-center ml-auto mr-auto mt-3">
@@ -40,7 +98,11 @@ class Register extends React.Component{
                                 
                                 <div className="form-group row">
                                     <div className="col-12">
-                                    <button type="button"    className="btn btn-primary" style={{width:"300px"}} ><i className="fas fa-sign-in-alt" /> Sign Up!</button>
+                                    {this.renderLoadingOrBtn()}
+                                    <div>
+                                    <button  className="btn border-primary mt-2" onClick={this.loginWithGoogle} style={{width:'300px'}}>"login with google"</button>
+                                    </div>                                    
+                                    {this.renderErrorMassege()}
                                     </div>
                                         
                                 </div>
@@ -54,5 +116,12 @@ class Register extends React.Component{
         )
     }
 }
+const mapStateToProps = (state) => {
+    return{
+        user : state.user.username,
+        loading : state.user.loading,
+        error : state.user.error
+    }
+}
 
-export default Register
+export default connect(mapStateToProps,{userRegister,loginWithGoogle}) (Register)
