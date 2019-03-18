@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import {connect} from 'react-redux';
 import cookie from 'universal-cookie'
 import {resetUser} from './../1.actions'
+import { stat } from 'fs';
 
 const objCookie = new cookie
 class HeaderKu extends Component{
@@ -79,7 +80,7 @@ class HeaderKu extends Component{
                                     <NavLink > Hi , {this.props.bebas}  ({this.props.role}) </NavLink>
                                 </NavItem>
                                 <NavItem>
-                                    <Link to="/login"><NavLink className="btn btn-default border-primary" style={{fontSize:"14px"}}><i class="fas fa-cart-plus"/> Cart</NavLink></Link>
+                                    <Link to="/login"><NavLink className="btn btn-default border-primary" style={{fontSize:"14px"}}><i class="fas fa-cart-plus"/> Cart <span class="baget baget-light">{this.props.cart.length>0 ? this.props.cart.length : null}</span></NavLink></Link>
                                 </NavItem>
                                 <UncontrolledDropdown nav inNavbar>
                                 <DropdownToggle nav caret>
@@ -121,7 +122,8 @@ class HeaderKu extends Component{
 const matStateToProms = (state) => {
     return {
         bebas : state.user.username,
-        role : state.user.role
+        role : state.user.role,
+        cart : state.cart.cart
     }    
 }
 

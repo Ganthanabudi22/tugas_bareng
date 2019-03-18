@@ -5,6 +5,12 @@ import Product from './productthis'
 
 
 class Home extends React.Component{
+    state = {search : ''}
+    onBtnClick = () => {
+        var search = this.refs.searchBook.value
+        this.setState({search : search})
+
+    }
     render(){
         return(
             <div className="container">
@@ -13,7 +19,7 @@ class Home extends React.Component{
                         <div className="input-group mb-2">
                             <input type="text" ref="searchBook" className="form-control" placeholder="Masukkan kata kunci ... "  />
                             <div className="input-group-append">
-                                <button className="btn btn-info" type="button" id="button-addon2" ><i className="fas fa-search" /></button>
+                                <button className="btn btn-info"  type="button" id="button-addon2" onClick={this.onBtnClick} ><i className="fas fa-search" /></button>
                             </div>
                         </div> 
                         <div className="card p-2">
@@ -42,7 +48,7 @@ class Home extends React.Component{
                         {this.props.id}
                     </div>
                 </div>
-                <Product/>
+                <Product search={this.state.search}/>
             </div>
         )
     }

@@ -4,13 +4,14 @@ import Home from './components/Home'
 import Login from './components/Login'
 import Register from './components/Register'
 import Product from './components/productthis'
+import Cart from './components/cart'
 import ManageProduct from './components/admin/manageProduct'
 import PageNotFound from './components/pageNotFound'
 import ProductDetail from './components/productDetail'
 import ScrollToTop from './components/scroll'
 import {connect} from 'react-redux'
 import cookie from 'universal-cookie'
-import {keepLogin} from './1.actions'
+import {keepLogin, keepCart} from './1.actions'
 import { Route, withRouter,Switch } from 'react-router-dom'
 import './App.css';
 
@@ -22,6 +23,10 @@ class App extends Component {
     var terseraah = objCookie.get('userData')
     if (terseraah !== undefined){
       this.props.keepLogin(terseraah)
+    }
+    var arrCookie = objCookie.get('userDataCart')
+    if (arrCookie !== undefined){
+      this.props.keepCart(arrCookie)
     }
   }
   
@@ -37,6 +42,8 @@ class App extends Component {
                   <Route path='/product' component={Product} exact/>
                   <Route path='/manageProduct' component={ManageProduct} exact/>
                   <Route path='/product-detail/:id' component={ProductDetail} exact/>
+                  <Route path='/cart' component={Cart} exact/>
+
                   <Route path='*' component={PageNotFound} exact/>
               </Switch>
             </ScrollToTop>
@@ -48,4 +55,4 @@ class App extends Component {
   }
 }
 
-export default withRouter( connect (null, {keepLogin}) (App));
+export default withRouter( connect (null, {keepLogin,keepCart}) (App));

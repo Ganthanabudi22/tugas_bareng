@@ -1,11 +1,16 @@
 import React from 'react'
 import Axios from 'axios';
 import {connect} from 'react-redux'
+import {addToCart} from './../1.actions'
 
 class ProductDetail extends React.Component{
-    state = {products : {}}
+    state = {products : {},cart:[]}
     componentDidMount(){
         this.getDataApi()
+    }
+
+    componentWillReceiveProps(newProps){
+        this.setState({cart:newProps.cart})
     }
     getDataApi = () => {
         var idUrl = this.props.match.params.id
@@ -22,8 +27,16 @@ class ProductDetail extends React.Component{
             this.refs.jumlah.value = 1
         }
     }
+    masukKeranjang = () => {
+        var qty = parseInt(this.refs.jumlah.value)
+        var catatan = this.refs.catatan.value
+        var newObj = {...this.state.products,id_products:this.state.products.id,id_user:this.props.id,qty:qty,catatan:catatan}
+        delete newObj.id
+        this.props.addToCart(newObj)
+        
+    }
     render (){
-        var {nama,img,discount,category,deskripsi,harga} = this.state.products
+        var {nama,img,discount,category,deskripsi,harga,id} = this.state.products
         return(
             <div className='container'>
                 <div className='row'>
@@ -57,7 +70,7 @@ class ProductDetail extends React.Component{
                                 <div style={{marginTop:'15px', color:'#606060', fontWeight:'700', fontSize:'14px'}}>
                                     Catatan Untuk Penjual
                                 </div>
-                                <input type='text' style={{marginTop:'13px'}} className='form-control'placeholder='Contoh warna putih ukuran Xl'/>
+                                <input type='text' style={{marginTop:'13px'}} className='form-control'placeholder='Contoh warna putih ukuran Xl' ref = 'catatan'/>
                             </div>
                         </div>
                         <div className="row">
@@ -67,7 +80,7 @@ class ProductDetail extends React.Component{
                                 </p>
                             </div>
                         </div>
-                        {this.props.obj === "" 
+                        {this.props.username === "" 
                         ?
                         <div className='row mt-4'>
                             <input type='button' disabled className='btn border-secondary col-md-2' value='Add to-Wishlist'/>
@@ -78,23 +91,25 @@ class ProductDetail extends React.Component{
                         <div className='row mt-4'>
                             <input type='button' className='btn border-secondary col-md-2' value='Add to-Wishlist'/>
                             <input type='button' className='btn btn-primary col-md-3' value='Beli Sekarang'/>
-                            <input type='button' className='btn btn-success col-md-3' value='Masukkan ke keranjang'/>
+                            <input type='button' className='btn btn-success col-md-3' value='Masukkan ke keranjang'onClick = {this.masukKeranjang}/>
                         </div>
                         }
                     </div>
+                    {this.state.cart.length}
                 </div>
             </div>
         )
     }
 }
 const mapStateToProps = (state) => {
-    var obj = state.user.username
 
     return{
-        obj : obj
+        username : state.user.username,
+        id : state.user.id,
+        cart : state.cart.cart
     }
 }
 
-export default connect (mapStateToProps)(ProductDetail);
+export default connect (mapStateToProps,{addToCart})(ProductDetail);
 
 
