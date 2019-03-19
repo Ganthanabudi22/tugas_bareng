@@ -8,7 +8,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableFooter from '@material-ui/core/TableFooter';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import Paper from '@material-ui/core/Paper';  
 import IconButton from '@material-ui/core/IconButton';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -16,9 +16,12 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import Axios from 'axios';
 import { Button,Icon, Input,Label } from 'semantic-ui-react';
+import {Link} from 'react-router-dom'
 import { connect } from 'react-redux';
 import swal from 'sweetalert';
 import cookie from 'universal-cookie';
+import {iconCart} from './../1.actions'
+import pageNotFound from './pageNotFound'
 
 const objCookie = new cookie()
 const actionsStyles = theme => ({
@@ -29,7 +32,11 @@ const actionsStyles = theme => ({
   },
 });
 
+
 class TablePaginationActions extends React.Component {
+  
+
+  
   handleFirstPageButtonClick = event => {
     this.props.onChangePage(event, 0);
   };
@@ -128,9 +135,13 @@ class CustomPaginationActionsTable extends React.Component {
   }
 
   getDataApi = () => {
-    var id = objCookie.get('userDataCart')
-      Axios.get('http://localhost:2003/cart?id_user=' +id)
-      .then((res) => this.setState({rows : res.data}))
+    var id = objCookie.get('userData')
+      Axios.get('http://localhost:2003/cart?username=' + id)
+      .then((res) =>{
+        this.setState({rows : res.data})
+        var a = this.state.rows.length
+        this.props.iconCart(a)
+      })
       .catch((err) => console.log(err))
   }
 
@@ -167,18 +178,25 @@ class CustomPaginationActionsTable extends React.Component {
                   <TableCell>{val.discount}%</TableCell>
                   <TableCell>Rp. {val.harga*val.qty-(val.harga*(val.discount/100))}</TableCell>
                   <TableCell> 
-                  <Button animated color='blue' onClick={() => this.onBtnEditClick(val)}>
-                    <Button.Content visible>Edit</Button.Content>
-                    <Button.Content hidden>
-                    <Icon name='edit' />
-                        </Button.Content>
-                    </Button>
-                    <Button animated color='red' onClick={() => this.onBtnDelete(val.id)}>
-                        <Button.Content visible>Del</Button.Content>
-                        <Button.Content hidden>
-                        <Icon name='delete' />
-                        </Button.Content>
-                    </Button>
+                    <TableBody>
+                      <TableRow>
+                          <TableCell>
+                            <Button animated color='blue' onClick={() => this.onBtnEditClick(val)}>
+                              <Button.Content visible>Edit</Button.Content>
+                              <Button.Content hidden>
+                              <Icon name='edit' />
+                                  </Button.Content>
+                              </Button>
+                              <Button animated color='red' onClick={() => this.onBtnDelete(val.id)}>
+                                  <Button.Content visible>Del</Button.Content>
+                                  <Button.Content hidden>
+                                  <Icon name='delete' />
+                                </Button.Content>
+                            </Button>
+                          </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  
                     </TableCell>
                     
             </TableRow>
@@ -205,8 +223,13 @@ class CustomPaginationActionsTable extends React.Component {
     var category =this.state.box.category
     var img = this.state.box.img
     var deskripsi = this.state.box.deskripsi
+    var id_products = this.state.box.id_products
+    var id_user = this.state.box.id_user
+    var catatan = this.state.box.catatan
+    var username = this.state.box.username
 
-    var qty = this.qtyEdit.inputRef.value === "" ? this.state.editeItem.qty  : this.qtyEdit.inputRef.value
+
+    var qty = this.qtyEdit.inputRef.value === "" ? this.state.editeItem.qty  : parseInt( this.qtyEdit.inputRef.value)
 
     var newData = {
       nama : nama,
@@ -215,8 +238,13 @@ class CustomPaginationActionsTable extends React.Component {
       category : category,
       img : img,
       deskripsi : deskripsi,
-      qty : qty
+      id_products :id_products,
+      id_user : id_user,
+      catatan : catatan,
+      qty : qty,
+      username : username
     }
+  
     Axios.put('http://localhost:2003/cart/' + this.state.editeItem.id , newData)
     .then((res) => {
         this.getDataApi()
@@ -227,8 +255,105 @@ class CustomPaginationActionsTable extends React.Component {
         console.log(err)
     })
 } 
+onBtnCheckOut = () => {
+  // ////////////////////////////////////////////////////////AWAL////////////////////////////////////////////////////////////////////////
+  var getCookie = objCookie.get('userData')
+  Axios.get('http://localhost:2003/cart?username=' +getCookie)
+    .then((res)=>{
+      var arr = []
+      for (var i=0; i<this.state.rows.length ; i++){
+      arr.push(this.state.rows[i])
 
+          Axios.delete('http://localhost:2003/cart/'+this.state.rows[i].id)
+              .then ((res)=>{
+                console.log(res)
+                this.getDataApi()
+              })
+              .catch((err)=>{
+                //swal
+              })
+      }
+      // var date = new Date()
+
+      // var id_user = res.data[i].id_user
+      // var nama = res.data[i].nama
+      // var harga = res.data[i].harga
+      // var discount = res.data[i].discount
+      // var category = res.data[i].category
+      // var deskripsi = res.data[i].deskripsi
+      // var img = res.data[i].img
+      // var id_products = res.data[i].id_products
+      // var qty = res.data[i].qty
+      // var username = res.data[i].username
+
+      var newpost = {
+        date: new Date().toISOString().slice(0,10),
+        id_user: res.data[0].id_user,
+        listCart: res.data,
+        username :res.data[0].username
+      }
+      Axios.post('http://localhost:2003/history',newpost)
+        .then ((res)=>{
+          //swal
+        })
+        .catch((err)=>{
+          console.log(err)
+        })
+    })
+    .catch((res)=>{
+      
+    })
+// ////////////////////////////////////////////////////////////AKHIR///////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////AWAL/////////////////////////////////////////////////////////////////////////
+//   var getCookie = objCookie.get('userData')
+
+// Axios.get('http://localhost:2003/cart?username='+getCookie)
+//     .then((res) => {
+//       console.log(res)
+//       const newData = {
+//         date: new Date().toISOString().slice(0,10),
+//         userId: res.data[0].id,
+//         listCart: res.data
+//       }
+//       for(var i=0; i < res.data.length; i++) {
+//         Axios.delete('http://localhost:2003/cart/' + res.data[i].id)
+//         .then ((res)=>{
+//           console.log(res)
+          
+//         })
+//         .catch((err)=>{
+//           console.log(err)
+//         })
+//       }
+      
+//         Axios.post('http://localhost:2003/history', newData)
+//         .then ((res) => {
+//           console.log(res)
+//           this.getDataApi(this.props.username)
+//           this.getCartValue()
+//         })
+//         .catch((err)=>{
+//           console.log(err)
+//         })
+//     })
+//     .catch((err)=>{
+//       console.log(err)
+//     })
+}
+
+hitungTotalCaer = () => {
+  var item = this.state.rows.length
+  var total = 0
+
+  for(var i = 0 ; i<item ; i++){
+    
+    var totalHargaBelanja = this.state.rows[i].harga*this.state.rows[i].qty-(this.state.rows[i].harga*(this.state.rows[i].discount/100))
+    total += totalHargaBelanja
+  }
+  return total
+}
   render() {
+
     const { classes } = this.props;
     const { rows, rowsPerPage, page } = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
@@ -236,7 +361,10 @@ class CustomPaginationActionsTable extends React.Component {
     var {nama,harga,discount,category,deskripsi,img} = this.state.editItem;
     
       return (
+
         <div className='container'>
+        {this.state.rows.length >0 ?
+
           <Paper className={classes.root}>
             <div className={classes.tableWrapper}>
               <Table className={classes.table}>
@@ -282,6 +410,15 @@ class CustomPaginationActionsTable extends React.Component {
               </Table>
             </div>
           </Paper>
+          :
+          <Paper className={classes.root}>
+            <div className={classes.tableWrapper}>
+              <Table className={classes.table}>
+              
+              </Table>
+            </div>
+          </Paper>
+          }
            {/* ====================================== EDIT PRODUCTS ============================================================ */}
     {
         this.state.isEdite === true ?
@@ -318,6 +455,74 @@ class CustomPaginationActionsTable extends React.Component {
         </Paper>
         : null
     }
+     {/* ====================================== CHECKOUT PRODUCTS ============================================================ */}
+    {this.state.rows.length >0 ?
+        <Paper className ='mt-12 justify-content-sm-center'>
+            <Table>
+                <TableHead>
+                <TableCell style={{fontSize:'24px', fontWeight:'600'}}>CHECKOUT PRODUCTS </TableCell>
+                <TableRow>
+                </TableRow>
+                </TableHead>
+                <TableBody>
+                    <TableRow>
+                    <TableCell>
+                    <TableBody>
+                    <TableRow>
+                    <TableCell>
+              
+
+                    
+                      <Button animated color='teal' onClick={this.onBtnCheckOut}>
+                            <Button.Content visible>CHECKOUT</Button.Content>
+                            <Button.Content hidden>
+                                <Icon name='save' />
+                            </Button.Content>
+                        </Button>
+                       
+                        
+                        
+                        <Link to="/product">
+                        <Button animated color='red' onClick={this.onBtnCencle}>
+                            <Button.Content visible>Continue Shopping</Button.Content>
+                        </Button>
+                        </Link>
+                        
+                        
+                    </TableCell>
+                    </TableRow>
+                </TableBody>
+                        {/* <Button animated color='teal' onClick={this.onBtnCheckOut}>
+                            <Button.Content visible>CHECKOUT</Button.Content>
+                            <Button.Content hidden>
+                                <Icon name='save' />
+                            </Button.Content>
+                        </Button> */}
+                        
+                      <h1>Rp. {this.hitungTotalCaer()}</h1>
+                    </TableCell>
+                        
+                    
+                    </TableRow>
+                    
+                </TableBody>
+                
+            </Table>
+        </Paper>
+            :
+            <TableBody>
+            <TableRow>
+            <TableCell>
+                <Link to="/product">
+                <Button animated color='red' onClick={this.onBtnCencle}>
+                    <Button.Content visible>You Cart is Empty. Continue Shopping ????</Button.Content>
+                </Button>
+                </Link>
+            </TableCell>
+            </TableRow>
+        </TableBody>
+          }
+    
           </div>
         );
     
@@ -337,4 +542,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect (mapStateToProps)(withStyles(styles)(CustomPaginationActionsTable));
+export default connect (mapStateToProps,{iconCart})(withStyles(styles)(CustomPaginationActionsTable));

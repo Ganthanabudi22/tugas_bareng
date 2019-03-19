@@ -1,5 +1,6 @@
 import axios from 'axios'
 import cookie from 'universal-cookie'
+import Swal from 'sweetalert'
 
 
 var objCookie =new cookie()
@@ -12,6 +13,7 @@ export const addToCart = (newProduct) => {
 
             var quantity = res.data[0].qty + newProduct.qty
             axios.put('http://localhost:2003/cart/' + res.data[0].id, {...newProduct,qty:quantity})
+            Swal('MASUK','add product success','success')
             .then((res)=>{
                 axios.get('http://localhost:2003/cart?id_user=' +newProduct.id_user )
                 .then ((res) => {
@@ -36,7 +38,6 @@ export const addToCart = (newProduct) => {
             })
 
         }else{
-            alert('masuk 2')
             axios.post('http://localhost:2003/cart', newProduct)
             .then((res)=>{
                 axios.get('http://localhost:2003/cart?id_user=' +newProduct.id_user )
@@ -81,4 +82,10 @@ export const keepCart  = (id_user) => {
         .catch((err) => console.log(err))
     }
     
+}
+export const iconCart = (param) =>{
+    return{
+        type : "ICON_CART",
+        payload : param
+    }
 }

@@ -2,6 +2,7 @@ import React from 'react'
 import Axios from 'axios';
 import {connect} from 'react-redux'
 import {addToCart} from './../1.actions'
+import swal from 'sweetalert'
 
 class ProductDetail extends React.Component{
     state = {products : {},cart:[]}
@@ -28,11 +29,58 @@ class ProductDetail extends React.Component{
         }
     }
     masukKeranjang = () => {
-        var qty = parseInt(this.refs.jumlah.value)
+        // var qty = parseInt(this.refs.jumlah.value)
+        // var catatan = this.refs.catatan.value
+        // var newObj = {...this.state.products,id_products:this.state.products.id,id_user:this.props.id,qty:qty,catatan:catatan}
+        // delete newObj.id
+        // this.props.addToCart(newObj)
+        
+        var qty = parseInt( this.refs.jumlah.value)
+        var id_user = parseInt(this.props.id)
+        var id_products = this.state.products.id
+        var discount = this.state.products.discount
+        var nama = this.state.products.nama
+        var harga = this.state.products.harga
+        var category = this.state.products.category
+        var deskripsi = this.state.products.deskripsi
+        var img = this.state.products.img
         var catatan = this.refs.catatan.value
-        var newObj = {...this.state.products,id_products:this.state.products.id,id_user:this.props.id,qty:qty,catatan:catatan}
-        delete newObj.id
-        this.props.addToCart(newObj)
+        var username =this.props.username
+
+
+        var newdata = { 
+            nama: nama,
+            harga: harga,
+            discount : discount,
+            id_products :id_products,
+            category : category,
+            img : img,
+            deskripsi : deskripsi,
+            id_user : id_user,
+            catatan : catatan,
+            qty : qty,
+            username :username
+        }
+        // alert(newdata)
+
+        // this.props.addcartglobal(newdata)
+
+        Axios.get('http://localhost:2003/cart?id_user ='+this.props.id+"&id_products="+newdata.id_products)
+        .then((res)=>{
+            if (res.data.length>0){
+                qty = res.data[0].qty+qty
+                Axios.put('http://localhost:2003/cart/'+res.data[0].id,{...newdata,qty })
+                swal('Status Add','edit product success','success')
+            }else{
+                Axios.post('http://localhost:2003/cart',newdata)
+                swal('Status Add','add product success','success')
+                
+            }
+        })
+        .catch((err)=>{
+                console.log(err)
+        })
+
         
     }
     render (){

@@ -9,7 +9,7 @@ class ProductList extends React.Component {
     state = {listProduct : []}
 
     componentDidMount(){
-        alert(this.props.search)
+        // alert(this.props.search)
         this.getDataProduct()
     }
     getDataProduct = () => {

@@ -5,6 +5,7 @@ import {connect} from 'react-redux';
 import cookie from 'universal-cookie'
 import {resetUser} from './../1.actions'
 import { stat } from 'fs';
+import PageNotFound from './pageNotFound'
 
 const objCookie = new cookie
 class HeaderKu extends Component{
@@ -51,6 +52,7 @@ class HeaderKu extends Component{
                                 <NavItem>
                                     <Link to="/login"><NavLink className="btn btn-default border-primary" style={{fontSize:"14px"}}><i className="fas fa-sign-in-alt" /> Masuk</NavLink></Link>
                                 </NavItem>
+                                
                             </Nav>
                         </Collapse>
                     </Navbar>
@@ -79,9 +81,13 @@ class HeaderKu extends Component{
                                 <NavItem>
                                     <NavLink > Hi , {this.props.bebas}  ({this.props.role}) </NavLink>
                                 </NavItem>
+                                
                                 <NavItem>
-                                    <Link to="/login"><NavLink className="btn btn-default border-primary" style={{fontSize:"14px"}}><i class="fas fa-cart-plus"/> Cart <span class="baget baget-light">{this.props.cart.length>0 ? this.props.cart.length : null}</span></NavLink></Link>
+                                    <Link to="/cart"><NavLink className="btn btn-default border-primary" style={{fontSize:"14px"}}><i class="fas fa-cart-plus"/> Cart <span class="baget baget-light">{this.props.cart}</span></NavLink></Link>
                                 </NavItem>
+                                
+                                
+
                                 <UncontrolledDropdown nav inNavbar>
                                 <DropdownToggle nav caret>
                                 Menu
@@ -96,9 +102,12 @@ class HeaderKu extends Component{
                                 :null
                                 }
                                 <DropdownItem divider />
-                                <DropdownItem>
-                                    Histori Transaksi
-                                </DropdownItem>
+                                <Link to = '/histori'>
+                                    <DropdownItem>
+                                        Histori Transaksi
+                                    </DropdownItem>
+                                </Link>
+                                
                                 <DropdownItem divider />
                                 <DropdownItem>
                                     Edite Profile
@@ -123,7 +132,7 @@ const matStateToProms = (state) => {
     return {
         bebas : state.user.username,
         role : state.user.role,
-        cart : state.cart.cart
+        cart : state.cart.iconcart
     }    
 }
 

@@ -5,6 +5,7 @@ import Login from './components/Login'
 import Register from './components/Register'
 import Product from './components/productthis'
 import Cart from './components/cart'
+import Histori from './components/histori'
 import ManageProduct from './components/admin/manageProduct'
 import PageNotFound from './components/pageNotFound'
 import ProductDetail from './components/productDetail'
@@ -42,7 +43,9 @@ class App extends Component {
                   <Route path='/product' component={Product} exact/>
                   <Route path='/manageProduct' component={ManageProduct} exact/>
                   <Route path='/product-detail/:id' component={ProductDetail} exact/>
+                  
                   <Route path='/cart' component={Cart} exact/>
+                  <Route path='/histori' component={Histori} exact/>
 
                   <Route path='*' component={PageNotFound} exact/>
               </Switch>
